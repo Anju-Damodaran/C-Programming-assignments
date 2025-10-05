@@ -1,0 +1,118 @@
+Problem (Day 1: Historian Hysteria)
+We are given two lists of numbers (location IDs). To reconcile them, we must:
+
+Sort both lists independently.
+
+Pair the smallest number in the left list with the smallest in the right list, the second-smallest with the second-smallest, and so on.
+
+For each pair, calculate the absolute difference.
+
+Add up all differences to get the total distance.
+
+This tells us how far apart the two lists are.
+
+Explanation of my C code
+
+Header files
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <direct.h>
+
+
+stdio.h → for input/output functions (printf, fscanf).
+
+stdlib.h → for memory management (malloc, realloc, free).
+
+string.h → unused here, but often used for string handling.
+
+direct.h → for getcwd() to print the current working directory (debugging).
+
+swap function
+
+void swap(int* a, int* b) { ... }
+
+
+Swaps two integers, needed for the bubble sort.
+
+bubble_sort function
+
+void bubble_sort(int* arr, int n) { ... }
+
+
+A simple sorting algorithm.
+
+Repeatedly compares adjacent numbers and swaps them if out of order.
+
+Runs until the whole array is sorted.
+
+main function
+
+Print working directory (debugging help):
+
+getcwd(cwd, sizeof(cwd));
+printf("Current working directory: %s\n", cwd);
+
+
+Open file:
+
+FILE* file = fopen("C:\\Users\\Dell\\OneDrive\\Documents\\c program assignment\\day1\\input.txt", "r");
+
+
+If opening fails, the program prints an error and exits.
+
+Allocate memory:
+
+int* left_list = malloc(1000 * sizeof(int));
+int* right_list = malloc(1000 * sizeof(int));
+
+
+Stores the two lists of numbers. Expands with realloc if more space is needed.
+
+Read input pairs:
+
+while (fscanf(file, "%d %d", &left, &right) == 2) { ... }
+
+
+Reads two numbers at a time: one goes into left_list, the other into right_list.
+
+Sort both lists:
+
+bubble_sort(left_list, count);
+bubble_sort(right_list, count);
+
+
+Ensures the numbers are in ascending order.
+
+Calculate total distance:
+
+long total_distance = 0;
+for (i = 0; i < count; i++) {
+    int diff = left_list[i] - right_list[i];
+    if (diff < 0) diff = -diff;
+    total_distance += diff;
+}
+
+
+Loops through both sorted lists, computes absolute difference for each pair, and adds them up.
+
+Print and cleanup:
+
+printf("%ld\n", total_distance);
+free(left_list);
+free(right_list);
+
+
+Reason for the output (1873376)
+
+Sorting ensures that each location ID from the left list is matched with the closest possible location ID from the right list.
+
+The sum of the absolute differences gives the minimum total distance between the two lists.
+
+When the given input file (input.txt) was processed, the program correctly computed this distance as:
+
+1873376
+
+
+This matches the required puzzle answer.
