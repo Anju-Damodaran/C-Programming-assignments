@@ -1,0 +1,65 @@
+In Part 1, the code validated updates against precedence rules modeled as a DAG (e.g., "47|53" means 47 → 53). For each update (comma-separated page sequence), it built an induced subgraph and checked if the sequence was a valid topological order using a biased DFS topo sort. Valid updates contributed their middle page (index size/2) to a sum (6041 for input).
+For Part 2 (inferred from code modifications, as full puzzle text for Part 2 isn't provided but typically involves reordering), the focus shifts to fixing invalid updates: If a sequence violates rules, compute a valid topological order (via DFS) and use the middle page of this reordered sequence for the sum. Valid updates are ignored (no addition). This ensures all updates contribute a middle page from a correct order, perhaps to account for printer reordering time or Elves' needs. The code's logic sums middles only from invalid updates' reordered results, printing reorders for them.
+Example (from Part 1):
+
+Invalid update "75,97,47,61,53" violates 97|75. Reorder via topo (e.g., to "97,75,47,61,53"), middle might be 75; add to sum.
+Valid ones like "75,47,61,53,29" (middle 61) are skipped.
+
+Assumes the biased DFS produces a valid topo (not necessarily unique; puzzle likely has unique or consistent middles). Final sum for puzzle input (hypothetical Part 2 answer) would differ from 6041.
+Approach
+
+Graph Modeling: Same as Part 1—adjacency lists with fixed arrays (128 vertices max).
+Parse Rules: Read "A|B" as reversed edge B → A for DFS post-order to yield forward topo.
+Parse Updates: Split commas, parse ints, build subset bitmap.
+Induced Subgraph: Copy relevant edges.
+Topo Sort and Validation: Biased DFS from input order; if not matching input, it's invalid—use the computed topo order t[] as reordered, add its middle to sum; print reorder. If matching, valid—skip sum.
+Output: Sum of reordered middles from invalid updates.
+
+O(V + E) per update; efficient.
+Key Implementation Details
+
+Data Structures (Unchanged from Part 1):
+
+Vertex: color (0=unvisited, 1=visiting, 2=visited), firstEdge (outgoing head).
+Edge: source, target, nextEdge (linked list).
+Graph: edgeCount, vertices[128], edges[128*127] (pool).
+
+
+Graph Functions (Unchanged):
+
+graph(): Reset.
+graph_add_edge(): Prepend from pool; debug print.
+
+
+Validation Functions (Unchanged):
+
+sequence_equals(): Array equality.
+topological_sort_component(): Recursive DFS post-order append (successors first).
+topological_sort(): Iterate input order for biased DFS; append to t[].
+
+
+Parsing (Unchanged):
+
+Rules: fgets + sscanf "%u|%u" → add u → v (reversed).
+Updates: fgets + strtok ","; trim, atoi, skip errors (>127, non-int); subset[u]=1, store in vertices[].
+
+
+Main Changes in Loop (Part 2 Logic):
+ctLength = topological_sort(t, vertices, vertexCount, &subgraph);
+// ... print t
+if (sequence_equals(vertices, vertexCount, t, tLength) != EQUAL) {  // Note: != for invalid
+    n += t[vertexCount / 2];  // Add middle from *reordered* t[]
+    printf("Invalid update %u, reordered to: ", n / 1000);  // Flawed index (n/1000 ≈0)
+    // Print t sequence
+    printf(", middle page = %u\n", t[vertexCount / 2]);
+} else {
+    printf("Valid update %u\n", n / 1000 + 1);
+}
+
+Inverts Part 1 condition (!= EQUAL) to target invalids.
+Uses t[middle] (reordered) for sum, not vertices[middle].
+Prints reorder details for invalids; skips sum/print for valids.
+
+
+File/Debug (Unchanged): Hardcoded path, empty check (fseek/ftell), line errors, CWD print, edge/add prints.
+Assumptions/Limitations: DAG (no cycle detect/error); DFS yields consistent reorder (puzzle topo unique); even sizes floor middle; unsigned <128; debug floods output.
